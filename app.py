@@ -7,58 +7,41 @@ import re
 # Page configuration
 # ---------------------------------------------------
 st.set_page_config(
-    hide_streamlit_style = """
-<style>
-
-/* Hide entire Streamlit header */
-header {visibility: hidden;}
-
-/* Hide footer */
-footer {visibility: hidden;}
-
-/* Move content up to remove empty space */
-.block-container {
-    padding-top: 1rem;
-}
-
-</style>
-"""
-
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)    page_title="Nederlandse Werkwoorden Tool",
+    page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------
-# Hide GitHub, Manage App, Deploy and Footer
+# Hide GitHub badge, Manage App, Deploy button, footer
 # ---------------------------------------------------
 hide_streamlit_style = """
 <style>
 
-/* Hide GitHub icon in header */
-header a[href*="github.com"]{
-    display:none !important;
+/* Hide GitHub icon */
+header a[href*="github"] {
+    display: none !important;
+}
+
+/* Hide Manage App button */
+button[kind="header"] {
+    display: none !important;
 }
 
 /* Hide Deploy button */
-.stAppDeployButton{
-    display:none !important;
+.stAppDeployButton {
+    display: none !important;
 }
 
-/* Hide Manage App (status widget in Streamlit Cloud) */
-[data-testid="stStatusWidget"]{
-    display:none !important;
+/* Hide footer */
+footer {
+    visibility: hidden;
 }
 
-/* Hide Streamlit footer */
-footer{
-    visibility:hidden !important;
-}
-
-/* Keep menu and tools visible */
-#MainMenu{
-    visibility:visible !important;
+/* Keep main menu visible */
+#MainMenu {
+    visibility: visible;
 }
 
 </style>
@@ -75,11 +58,16 @@ def load_data():
     file_path = "0-KNM-A2_Tool4.xlsx"
 
     if os.path.exists(file_path):
+
         try:
             df = pd.read_excel(file_path, sheet_name="Blad2")
+
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
+
             df["original_index"] = range(len(df))
+
             return df
+
         except:
             return None
 
@@ -108,23 +96,25 @@ page = st.sidebar.radio(
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 
-link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-st.sidebar.code(link)
+website_link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+
+st.sidebar.code(website_link)
 
 # ---------------------------------------------------
-# Word search page
+# Word Search Page
 # ---------------------------------------------------
 if page == "Woordzoeker":
 
     if data is not None:
 
-        cols = data.columns
+        columns = data.columns
+
         st.title("Nederlandse Woordenschat")
 
         word_list = data.iloc[:, 0].astype(str).tolist()
 
         selected_word = st.selectbox(
-            f"Zoek {cols[0]}:",
+            f"Zoek {columns[0]}:",
             options=[""] + word_list
         )
 
@@ -133,82 +123,89 @@ if page == "Woordzoeker":
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
 
             is_irregular = result_row["original_index"] <= 206
+
             color = "#ff4b4b" if is_irregular else "#28a745"
 
+            verb_type = "Onregelmatig" if is_irregular else "Regelmatig"
+
             st.markdown(
-                f"<h2 style='color:{color};'>"
-                f"{'Onregelmatig' if is_irregular else 'Regelmatig'}: {selected_word}"
-                f"</h2>",
+                f"<h2 style='color:{color};'>{verb_type}: {selected_word}</h2>",
                 unsafe_allow_html=True
             )
 
-            c1, c2 = st.columns(2)
+            col1, col2 = st.columns(2)
 
-            with c1:
-                st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
-                st.info(f"**{cols[2]}**\n\n{result_row.iloc[2]}")
+            with col1:
+                st.info(f"**{columns[1]}**\n\n{result_row.iloc[1]}")
+                st.info(f"**{columns[2]}**\n\n{result_row.iloc[2]}")
 
-            with c2:
-                st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
-                st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
+            with col2:
+                st.success(f"**{columns[3]}**\n\n{result_row.iloc[3]}")
+                st.success(f"**{columns[4]}**\n\n{result_row.iloc[4]}")
 
 # ---------------------------------------------------
-# Text analysis page
+# Text Analysis Page
 # ---------------------------------------------------
 elif page == "Tekst Analyse":
 
     st.header("Tekst Analyse")
 
-    text_area = st.text_area(
+    text_input = st.text_area(
         "Plak je tekst hier:",
         height=300
     )
 
     if st.button("Analyseer"):
 
-        if text_area and data is not None:
+        if text_input and data is not None:
 
-            clean_text = re.sub(r'[^\w\s]', ' ', text_area)
+            clean_text = re.sub(r"[^\w\s]", " ", text_input)
+
             words = sorted(set([w.lower() for w in clean_text.split()]))
 
-            irr_db = set(
+            irregular_database = set(
                 data[data["original_index"] <= 206]
                 .iloc[:, 0]
                 .str.lower()
             )
 
-            reg_db = set(
+            regular_database = set(
                 data[data["original_index"] > 206]
                 .iloc[:, 0]
                 .str.lower()
             )
 
-            f_irr = [w for w in words if w in irr_db]
-            f_reg = [w for w in words if w in reg_db]
-            f_oth = [w for w in words if w not in irr_db and w not in reg_db]
+            found_irregular = [w for w in words if w in irregular_database]
+
+            found_regular = [w for w in words if w in regular_database]
+
+            found_other = [
+                w for w in words
+                if w not in irregular_database and w not in regular_database
+            ]
 
             col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.error(
-                    f"🔴 Onregelmatig ({len(f_irr)})\n\n"
-                    + ", ".join(f_irr)
+                    f"🔴 Onregelmatig ({len(found_irregular)})\n\n"
+                    + ", ".join(found_irregular)
                 )
 
             with col2:
                 st.success(
-                    f"🟢 Regelmatig ({len(f_reg)})\n\n"
-                    + ", ".join(f_reg)
+                    f"🟢 Regelmatig ({len(found_regular)})\n\n"
+                    + ", ".join(found_regular)
                 )
 
             with col3:
                 st.info(
-                    f"🔵 Overige ({len(f_oth)})\n\n"
-                    + ", ".join(f_oth)
+                    f"🔵 Overige ({len(found_other)})\n\n"
+                    + ", ".join(found_other)
                 )
 
 # ---------------------------------------------------
-# About page
+# About Page
 # ---------------------------------------------------
 elif page == "Over Ons":
 
@@ -223,7 +220,7 @@ elif page == "Over Ons":
     )
 
 # ---------------------------------------------------
-# Legal page
+# Legal Page
 # ---------------------------------------------------
 elif page == "Juridische Informatie":
 
@@ -234,10 +231,12 @@ elif page == "Juridische Informatie":
     )
 
 # ---------------------------------------------------
-# Contact page
+# Contact Page
 # ---------------------------------------------------
 elif page == "Contact":
 
     st.header("Contactinformatie")
 
-    st.success("📧 Email: osamaalaarajj@gmail.com")
+    st.success(
+        "📧 Email: osamaalaarajj@gmail.com"
+    )
