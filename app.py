@@ -3,36 +3,49 @@ import pandas as pd
 import os
 import re
 
-# 1. إعدادات الصفحة وجعل البحث هو البداية
+# 1. Page Configuration
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- كود CSS القوي لإخفاء الأزرار الثلاثة المحددة فقط ---
+# --- CSS to hide GitHub icon, Fork button, and Manage app button ---
 st.markdown("""
     <style>
-    /* 1. إخفاء زر Fork و GitHub و Deploy وكل الروابط في الهيدر العلوي */
-    header [data-testid="stHeader"] a {
-        display: none !important;
+    /* Hide the entire top right toolbar except for the menu/theme if possible */
+    header [data-testid="stHeader"] {
+        background-color: rgba(0,0,0,0) !important;
     }
-    header [data-testid="stHeader"] svg {
+    
+    /* Target specific GitHub and Fork links by their href or position */
+    header a[href*="github.com"] {
         display: none !important;
     }
     
-    /* 2. إخفاء زر Manage app وكل ما يتعلق بشريط الحالة السفلي */
-    [data-testid="stStatusWidget"] {
+    /* Target the Deploy/Fork button specifically */
+    .stAppDeployButton {
         display: none !important;
-        visibility: hidden !important;
     }
+
+    /* Hide the footer and the Manage app button at the bottom right */
     footer {
         display: none !important;
-        visibility: hidden !important;
     }
     
-    /* إخفاء القائمة الإضافية التي قد تحتوي على رابط GitHub */
-    #MainMenu {visibility: hidden !important;}
+    [data-testid="stStatusWidget"] {
+        display: none !important;
+    }
+
+    /* Additional layer to hide any developer-related icons in header */
+    header svg {
+        display: none !important;
+    }
+    
+    /* Keep the sidebar toggle visible by specifically exempting its icon if needed */
+    [data-testid="stSidebarCollapsedControl"] svg {
+        display: block !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -51,17 +64,17 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية - صفحة البحث أولاً
+# 2. Sidebar Navigation (Word Search first)
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# رابط المشاركة
+# Sharing Section
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
 st.sidebar.code(app_url, language=None)
 
-# --- محتوى الصفحات ---
+# --- Page Logic ---
 
 if page == "Woordzoeker":
     if data is not None:
@@ -88,7 +101,7 @@ if page == "Woordzoeker":
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
     text_area = st.text_area("Voer tekst in:", height=300)
-    if st.button("Analyseer Tekst"):
+    if st.button("Analyseer"):
         if text_area and data is not None:
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
@@ -114,5 +127,5 @@ elif page == "Juridische Informatie":
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
 
 elif page == "Contact":
-    st.header("Contactinformatie")
+    st.header("Contact informatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
