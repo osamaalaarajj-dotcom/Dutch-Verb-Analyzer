@@ -3,15 +3,34 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration (Full Layout)
-st.set_page_config(page_title="Nederlandse Werkwoorden Tool", layout="wide")
+# 1. إعدادات الصفحة وجعل القائمة مفتوحة تلقائياً
+st.set_page_config(
+    page_title="Nederlandse Werkwoorden Tool", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- كود CSS لإخفاء أزرار البرمجة وتنظيف الواجهة ---
+hide_st_style = """
+            <style>
+            /* إخفاء شريط الأدوات العلوي بالكامل */
+            header {visibility: hidden !important;}
+            /* إخفاء زر Manage app في الأسفل */
+            footer {visibility: hidden !important;}
+            [data-testid="stStatusWidget"] {display: none !important;}
+            .stAppDeployButton {display: none !important;}
+            #MainMenu {visibility: hidden !important;}
+            /* إخفاء أي أزرار إضافية تظهر للمطور */
+            footer {display: none !important;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
     file = "0-KNM-A2_Tool4.xlsx"
     if os.path.exists(file):
         try:
-            # Loading full dataset
             df = pd.read_excel(file, sheet_name="Blad2")
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
             df['original_index'] = range(len(df))
@@ -22,20 +41,20 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation
+# 2. القائمة الجانبية - تم جعل البحث هو الخيار الأول
 st.sidebar.title("Navigatie")
-page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
+page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# --- SECTION 1: ABOUT (Full Description) ---
-if page == "Over Ons":
-    st.header("Over Ons")
-    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
-    st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
+# إضافة رابط المشاركة بشكل بسيط وأنيق
+st.sidebar.write("---")
+st.sidebar.write("🔗 **Deel de website:**")
+app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+st.sidebar.code(app_url, language=None)
 
-# --- SECTION 2: WORD SEARCH (All Columns Restored) ---
-elif page == "Woordzoeker":
+# --- منطق الصفحات ---
+
+# صفحة البحث عن الكلمات (تظهر أولاً الآن)
+if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
         st.title("Nederlandse Woordenschat")
@@ -50,12 +69,10 @@ elif page == "Woordzoeker":
             status = "Onregelmatig" if is_irregular else "Regelmatig"
             st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
 
-            # Restoring all data boxes
             c1, c2 = st.columns(2)
             with c1:
                 st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
                 st.info(f"**{cols[2]}**\n\n{result_row.iloc[2]}")
-            
             with c2:
                 st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
                 st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
@@ -63,15 +80,13 @@ elif page == "Woordzoeker":
             if len(cols) > 5 and pd.notna(result_row.iloc[5]):
                 st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
 
-# --- SECTION 3: TEXT ANALYSIS (Full Feature) ---
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    st.write("Plak uw tekst hieronder (tot 1500+ woorden) voor een gedetailleerde analyse.")
+    st.write("Plak uw tekst hieronder voor een gedetailleerde analyse.")
     text_area = st.text_area("Voer tekst in:", height=300)
     
-    if st.button("Analyseer Tekst"):
+    if st.button("Analyseer Tekست"):
         if text_area and data is not None:
-            # Clean and split text
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
             
@@ -90,15 +105,17 @@ elif page == "Tekst Analyse":
             with col3:
                 st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
-# --- SECTION 4: LEGAL ---
+elif page == "Over Ons":
+    st.header("Over Ons")
+    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.write("**Geomatics Engineer | Master in Project Management**")
+    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
+    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
+
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
-    st.markdown("- **Licentie:** MIT\n- **Eigendom:** Intellectueel eigendom van de auteur.")
 
-# --- SECTION 5: CONTACT (Restored) ---
 elif page == "Contact":
     st.header("Contactinformatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
-    st.info("🔗 **LinkedIn:** [Uw profiel link]")
-    st.write("Locatie: Nederland")
