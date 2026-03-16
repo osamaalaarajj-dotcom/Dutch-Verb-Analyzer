@@ -10,36 +10,33 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- THE CLEAN INTERFACE PROTOCOL (Hiding Streamlit UI) ---
-# This CSS will target and remove the header, footer, and management buttons
+# --- CLEAN INTERFACE & SHARE BUTTON STYLE ---
 st.markdown("""
     <style>
-    /* Hide the top header bar (Share, Star, GitHub, Deploy) */
     header {visibility: hidden !important;}
-    
-    /* Hide the footer (Made with Streamlit) */
     footer {visibility: hidden !important;}
-    
-    /* Hide the 'Manage app' button at the bottom right */
     [data-testid="stStatusWidget"] {display: none !important;}
     .stAppDeployButton {display: none !important;}
     
-    /* Remove any extra padding at the top */
-    .block-container {
-        padding-top: 1rem !important;
+    /* Style for the Share Button */
+    .share-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #25D366;
+        color: white !important;
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: 0.3s;
     }
-
-    /* Hide the 'Manage app' specifically for mobile/desktop */
-    iframe[title="manage-app"] {display: none !important;}
-    button[title="Manage app"] {display: none !important;}
+    .share-btn:hover {
+        background-color: #128C7E;
+        transform: scale(1.05);
+    }
     </style>
-    
-    <div style="display:none;">
-        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
-        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool.">
-        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
-    </div>
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -60,6 +57,14 @@ data = load_data()
 # 2. Sidebar Navigation
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
+
+# --- SHARE SECTION IN SIDEBAR ---
+st.sidebar.write("---")
+share_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+share_text = "Check out this amazing Dutch Verb Tool by Osama Al-Aaraj!"
+whatsapp_link = f"https://wa.me/?text={share_text} %20 {share_url}"
+
+st.sidebar.markdown(f'<a href="{whatsapp_link}" target="_blank" class="share-btn">🔗 Deel via WhatsApp</a>', unsafe_allow_html=True)
 
 # --- SECTIONS ---
 if page == "Over Ons":
