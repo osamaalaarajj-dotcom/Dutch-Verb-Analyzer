@@ -3,8 +3,37 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration (Fixed Layout)
-st.set_page_config(page_title="Nederlandse Werkwoorden Tool", layout="wide")
+# --- 1. SETTING UP PREVIEW CARD (THE MAGIC PART) ---
+st.set_page_config(
+    page_title="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj",
+    page_icon="🇳🇱",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    # These Meta Tags define what appears when you share the link:
+    menu_items={
+        'Get Help': 'mailto:osamaalaarajj@gmail.com',
+        'About': "© 2026 Osama Abd Al-Nasser Al-Aaraj. All rights reserved."
+    }
+)
+
+# Insert the special Meta Tags for Social Media Preview
+st.markdown("""
+    <head>
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/">
+        <meta property="og:title" content="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
+        <meta property="og:description" content="An advanced tool to analyze, categorize, and master Dutch regular and irregular verbs. Developed for students.">
+        <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
+
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/">
+        <meta property="twitter:title" content="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
+        <meta property="twitter:description" content="Analyze and master Dutch verbs with this professional tool. Free for students.">
+        <meta property="twitter:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
+    </head>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
 
 @st.cache_data
 def load_data():
@@ -21,11 +50,9 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation (Fixed Structure)
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
-# --- SECTION 1: OVER ONS ---
 if page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
@@ -33,7 +60,6 @@ if page == "Over Ons":
     st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
     st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-# --- SECTION 2: WOORDZOEKER (4 Boxes Fixed) ---
 elif page == "Woordzoeker":
     if data is not None:
         cols = data.columns
@@ -49,7 +75,6 @@ elif page == "Woordzoeker":
             status = "Onregelmatig" if is_irregular else "Regelmatig"
             st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
 
-            # Displaying the 4 core columns (Imperfectum & Voltooid)
             c1, c2 = st.columns(2)
             with c1:
                 st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
@@ -62,7 +87,6 @@ elif page == "Woordzoeker":
             if len(cols) > 5 and pd.notna(result_row.iloc[5]):
                 st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
 
-# --- SECTION 3: TEKST ANALYSE (Comprehensive Analysis) ---
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
     text_area = st.text_area("Voer tekst in (tot 1500+ woorden):", height=300)
@@ -87,13 +111,11 @@ elif page == "Tekst Analyse":
             with col3:
                 st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
-# --- SECTION 4: LEGAL ---
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
     st.markdown("- **Licentie:** MIT\n- **Eigendom:** Intellectueel eigendom van de auteur.")
 
-# --- SECTION 5: CONTACT ---
 elif page == "Contact":
     st.header("Contactinformatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
