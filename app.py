@@ -10,39 +10,38 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS to hide GitHub icon, Fork button, and Manage app button ---
+# --- ADVANCED CSS TO HIDE GITHUB, FORK, AND MANAGE APP ---
 st.markdown("""
     <style>
-    /* Hide the entire top right toolbar except for the menu/theme if possible */
-    header [data-testid="stHeader"] {
-        background-color: rgba(0,0,0,0) !important;
-    }
-    
-    /* Target specific GitHub and Fork links by their href or position */
-    header a[href*="github.com"] {
+    /* Hide the GitHub icon and the Fork button in the header */
+    header [data-testid="stHeader"] a {
         display: none !important;
+        visibility: hidden !important;
     }
     
-    /* Target the Deploy/Fork button specifically */
+    /* Hide the Deploy button/Fork option specifically */
     .stAppDeployButton {
         display: none !important;
+        visibility: hidden !important;
     }
 
-    /* Hide the footer and the Manage app button at the bottom right */
-    footer {
-        display: none !important;
-    }
-    
+    /* Hide the bottom right 'Manage app' button and footer */
     [data-testid="stStatusWidget"] {
         display: none !important;
+        visibility: hidden !important;
+    }
+    
+    footer {
+        display: none !important;
+        visibility: hidden !important;
     }
 
-    /* Additional layer to hide any developer-related icons in header */
+    /* Hide any additional toolbar icons (like GitHub) that may persist */
     header svg {
         display: none !important;
     }
-    
-    /* Keep the sidebar toggle visible by specifically exempting its icon if needed */
+
+    /* Keep the sidebar toggle button visible (exempting its SVG) */
     [data-testid="stSidebarCollapsedControl"] svg {
         display: block !important;
     }
@@ -64,11 +63,11 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation (Word Search first)
+# 2. Sidebar Navigation (Word Search as Default)
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# Sharing Section
+# Sharing Link in Sidebar
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
