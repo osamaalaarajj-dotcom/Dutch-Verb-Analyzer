@@ -5,47 +5,41 @@ import re
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool", 
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="Nederlandse Werkwoorden Tool",
+    page_icon="🇳🇱",
+    layout="wide"
 )
 
-# --- ADVANCED CSS TO HIDE GITHUB, FORK, AND MANAGE APP ---
+# --- THE CLEAN INTERFACE PROTOCOL (Hiding Streamlit UI) ---
+# This CSS will target and remove the header, footer, and management buttons
 st.markdown("""
     <style>
-    /* Hide the GitHub icon and the Fork button in the header */
-    header [data-testid="stHeader"] a {
-        display: none !important;
-        visibility: hidden !important;
-    }
+    /* Hide the top header bar (Share, Star, GitHub, Deploy) */
+    header {visibility: hidden !important;}
     
-    /* Hide the Deploy button/Fork option specifically */
-    .stAppDeployButton {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    /* Hide the bottom right 'Manage app' button and footer */
-    [data-testid="stStatusWidget"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
+    /* Hide the footer (Made with Streamlit) */
+    footer {visibility: hidden !important;}
     
-    footer {
-        display: none !important;
-        visibility: hidden !important;
+    /* Hide the 'Manage app' button at the bottom right */
+    [data-testid="stStatusWidget"] {display: none !important;}
+    .stAppDeployButton {display: none !important;}
+    
+    /* Remove any extra padding at the top */
+    .block-container {
+        padding-top: 1rem !important;
     }
 
-    /* Hide any additional toolbar icons (like GitHub) that may persist */
-    header svg {
-        display: none !important;
-    }
-
-    /* Keep the sidebar toggle button visible (exempting its SVG) */
-    [data-testid="stSidebarCollapsedControl"] svg {
-        display: block !important;
-    }
+    /* Hide the 'Manage app' specifically for mobile/desktop */
+    iframe[title="manage-app"] {display: none !important;}
+    button[title="Manage app"] {display: none !important;}
     </style>
+    
+    <div style="display:none;">
+        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
+        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool.">
+        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
+        <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
+    </div>
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -63,19 +57,19 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation (Word Search as Default)
+# 2. Sidebar Navigation
 st.sidebar.title("Navigatie")
-page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
+page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
-# Sharing Link in Sidebar
-st.sidebar.write("---")
-st.sidebar.write("🔗 **Deel de website:**")
-app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-st.sidebar.code(app_url, language=None)
+# --- SECTIONS ---
+if page == "Over Ons":
+    st.header("Over Ons")
+    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.write("**Geomatics Engineer | Master in Project Management**")
+    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
+    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-# --- Page Logic ---
-
-if page == "Woordzoeker":
+elif page == "Woordzoeker":
     if data is not None:
         cols = data.columns
         st.title("Nederlandse Woordenschat")
@@ -86,8 +80,7 @@ if page == "Woordzoeker":
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
             is_irregular = result_row['original_index'] <= 206
             color = "#ff4b4b" if is_irregular else "#28a745"
-            status = "Onregelmatig" if is_irregular else "Regelmatig"
-            st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='color: {color};'>{'Onregelmatig' if is_irregular else 'Regelmatig'}: {selected_word}</h2>", unsafe_allow_html=True)
 
             c1, c2 = st.columns(2)
             with c1:
@@ -100,7 +93,7 @@ if page == "Woordzoeker":
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
     text_area = st.text_area("Voer tekst in:", height=300)
-    if st.button("Analyseer"):
+    if st.button("Analyseer Tekst"):
         if text_area and data is not None:
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
@@ -111,20 +104,14 @@ elif page == "Tekst Analyse":
             f_oth = [w for w in words if w not in irr_db and w not in reg_db]
             
             col1, col2, col3 = st.columns(3)
-            with col1: st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
-            with col2: st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
-            with col3: st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
-
-elif page == "Over Ons":
-    st.header("Over Ons")
-    st.markdown(f"### Osama Abd Al-Nasser Al-Aaraj")
-    st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
+            with col1: st.error(f"🔴 Onregelmatig ({len(f_irr)})\n\n" + ", ".join(f_irr))
+            with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
+            with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
 
 elif page == "Contact":
-    st.header("Contact informatie")
+    st.header("Contactinformatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
