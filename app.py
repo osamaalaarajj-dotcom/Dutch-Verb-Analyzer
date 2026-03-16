@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# Professional Streamlit UI cleanup
+# Hide GitHub, Manage App and Deploy only
 # ---------------------------------------------------
 hide_streamlit_style = """
 <style>
@@ -24,34 +24,19 @@ header a[href*="github"] {
     display: none !important;
 }
 
+/* Hide Manage App */
+a[href*="share.streamlit.io"] {
+    display: none !important;
+}
+
 /* Hide Deploy button */
 .stAppDeployButton {
     display: none !important;
 }
 
-/* Hide Manage App button */
-button[kind="header"] {
-    display: none !important;
-}
-
-/* Hide Main menu (three dots) */
-#MainMenu {
-    visibility: hidden;
-}
-
 /* Hide footer */
 footer {
     visibility: hidden;
-}
-
-/* Hide Streamlit badge */
-.viewerBadge_container__1QSob {
-    display: none !important;
-}
-
-/* Make header cleaner */
-header {
-    background: transparent !important;
 }
 
 </style>
@@ -110,7 +95,7 @@ website_link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app
 st.sidebar.code(website_link)
 
 # ---------------------------------------------------
-# Word search page
+# Word Finder page
 # ---------------------------------------------------
 if page == "Woordzoeker":
 
@@ -153,7 +138,7 @@ if page == "Woordzoeker":
                 st.success(f"**{columns[4]}**\n\n{result_row.iloc[4]}")
 
 # ---------------------------------------------------
-# Text analysis page
+# Text Analysis page
 # ---------------------------------------------------
 elif page == "Tekst Analyse":
 
