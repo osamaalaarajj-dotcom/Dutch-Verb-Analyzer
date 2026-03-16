@@ -3,40 +3,28 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration
+# 1. Page Configuration (Fixed)
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool",
+    page_title="Nederlandse Werkwoorden Tool - Osama Al-Aaraj",
     page_icon="🇳🇱",
     layout="wide"
 )
 
-# --- CLEAN INTERFACE & SHARE BUTTON STYLE ---
-st.markdown("""
-    <style>
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    [data-testid="stStatusWidget"] {display: none !important;}
-    .stAppDeployButton {display: none !important;}
-    
-    /* Style for the Share Button */
-    .share-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #25D366;
-        color: white !important;
-        padding: 10px 20px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: bold;
-        margin-bottom: 20px;
-        transition: 0.3s;
-    }
-    .share-btn:hover {
-        background-color: #128C7E;
-        transform: scale(1.05);
-    }
-    </style>
+# Fix: Use a RAW GitHub link to ensure the preview image loads
+# I have formatted the meta tags to be invisible to the user but visible to shared links.
+raw_image_url = "https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg"
+app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+
+# Inserting hidden Meta Tags using HTML
+st.markdown(f"""
+    <div style="display:none;">
+        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
+        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool. Built for students.">
+        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
+        <meta property="og:image" content="{raw_image_url}">
+        <meta property="og:url" content="{app_url}">
+        <meta property="og:type" content="website">
+    </div>
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -57,14 +45,6 @@ data = load_data()
 # 2. Sidebar Navigation
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
-
-# --- SHARE SECTION IN SIDEBAR ---
-st.sidebar.write("---")
-share_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-share_text = "Check out this amazing Dutch Verb Tool by Osama Al-Aaraj!"
-whatsapp_link = f"https://wa.me/?text={share_text} %20 {share_url}"
-
-st.sidebar.markdown(f'<a href="{whatsapp_link}" target="_blank" class="share-btn">🔗 Deel via WhatsApp</a>', unsafe_allow_html=True)
 
 # --- SECTIONS ---
 if page == "Over Ons":
