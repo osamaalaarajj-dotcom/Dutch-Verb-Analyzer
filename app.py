@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# Hide GitHub badge, Manage App, Deploy button, footer
+# Professional Streamlit UI cleanup
 # ---------------------------------------------------
 hide_streamlit_style = """
 <style>
@@ -24,14 +24,19 @@ header a[href*="github"] {
     display: none !important;
 }
 
+/* Hide Deploy button */
+.stAppDeployButton {
+    display: none !important;
+}
+
 /* Hide Manage App button */
 button[kind="header"] {
     display: none !important;
 }
 
-/* Hide Deploy button */
-.stAppDeployButton {
-    display: none !important;
+/* Hide Main menu (three dots) */
+#MainMenu {
+    visibility: hidden;
 }
 
 /* Hide footer */
@@ -39,9 +44,14 @@ footer {
     visibility: hidden;
 }
 
-/* Keep main menu visible */
-#MainMenu {
-    visibility: visible;
+/* Hide Streamlit badge */
+.viewerBadge_container__1QSob {
+    display: none !important;
+}
+
+/* Make header cleaner */
+header {
+    background: transparent !important;
 }
 
 </style>
@@ -97,11 +107,10 @@ st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 
 website_link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-
 st.sidebar.code(website_link)
 
 # ---------------------------------------------------
-# Word Search Page
+# Word search page
 # ---------------------------------------------------
 if page == "Woordzoeker":
 
@@ -144,7 +153,7 @@ if page == "Woordzoeker":
                 st.success(f"**{columns[4]}**\n\n{result_row.iloc[4]}")
 
 # ---------------------------------------------------
-# Text Analysis Page
+# Text analysis page
 # ---------------------------------------------------
 elif page == "Tekst Analyse":
 
@@ -176,7 +185,6 @@ elif page == "Tekst Analyse":
             )
 
             found_irregular = [w for w in words if w in irregular_database]
-
             found_regular = [w for w in words if w in regular_database]
 
             found_other = [
@@ -205,7 +213,7 @@ elif page == "Tekst Analyse":
                 )
 
 # ---------------------------------------------------
-# About Page
+# About page
 # ---------------------------------------------------
 elif page == "Over Ons":
 
@@ -220,7 +228,7 @@ elif page == "Over Ons":
     )
 
 # ---------------------------------------------------
-# Legal Page
+# Legal page
 # ---------------------------------------------------
 elif page == "Juridische Informatie":
 
@@ -231,7 +239,7 @@ elif page == "Juridische Informatie":
     )
 
 # ---------------------------------------------------
-# Contact Page
+# Contact page
 # ---------------------------------------------------
 elif page == "Contact":
 
