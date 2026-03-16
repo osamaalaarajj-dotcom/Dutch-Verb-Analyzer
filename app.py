@@ -3,29 +3,24 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration (Fixed)
+# 1. إعدادات الصفحة الأساسية
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool - Osama Al-Aaraj",
+    page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
     layout="wide"
 )
 
-# Fix: Use a RAW GitHub link to ensure the preview image loads
-# I have formatted the meta tags to be invisible to the user but visible to shared links.
-raw_image_url = "https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg"
-app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-
-# Inserting hidden Meta Tags using HTML
-st.markdown(f"""
-    <div style="display:none;">
-        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
-        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool. Built for students.">
-        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="og:image" content="{raw_image_url}">
-        <meta property="og:url" content="{app_url}">
-        <meta property="og:type" content="website">
-    </div>
-""", unsafe_allow_html=True)
+# --- كود تنظيف الواجهة (إخفاء أزرار البرمجة) ---
+hide_style = """
+    <style>
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    .stAppDeployButton {display: none !important;}
+    #MainMenu {visibility: hidden !important;}
+    </style>
+"""
+st.markdown(hide_style, unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -42,11 +37,18 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation
+# 2. القائمة الجانبية
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
-# --- SECTIONS ---
+# --- قسم المشاركة في القائمة الجانبية (بدون أكواد معقدة) ---
+st.sidebar.write("---")
+st.sidebar.write("🔗 **Deel de website:**")
+link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+st.sidebar.code(link, language=None)
+st.sidebar.info("Kopieer de link om te delen met studenten.")
+
+# --- محتوى الصفحات ---
 if page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
@@ -77,8 +79,8 @@ elif page == "Woordzoeker":
 
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    text_area = st.text_area("Voer tekst in:", height=300)
-    if st.button("Analyseer Tekst"):
+    text_area = st.text_area("Plak je tekst hier:", height=300)
+    if st.button("Analyseer"):
         if text_area and data is not None:
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
