@@ -7,7 +7,24 @@ import re
 # Page configuration
 # ---------------------------------------------------
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool",
+    hide_streamlit_style = """
+<style>
+
+/* Hide entire Streamlit header */
+header {visibility: hidden;}
+
+/* Hide footer */
+footer {visibility: hidden;}
+
+/* Move content up to remove empty space */
+.block-container {
+    padding-top: 1rem;
+}
+
+</style>
+"""
+
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)    page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
     layout="wide",
     initial_sidebar_state="expanded"
