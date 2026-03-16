@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration
+# 1. إعدادات الصفحة - جعل البحث يفتح تلقائياً
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
@@ -11,33 +11,22 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- CSS FORCED STYLING (The fix for the sidebar button) ---
+# --- كود CSS لتنظيف الواجهة وضمان ظهور زر القائمة دائماً ---
 st.markdown("""
     <style>
-    /* 1. Hide development headers and footers */
+    /* إخفاء شريط الأدوات العلوي والقائمة الافتراضية */
     header {visibility: hidden !important;}
     footer {visibility: hidden !important;}
     [data-testid="stStatusWidget"] {display: none !important;}
     .stAppDeployButton {display: none !important;}
 
-    /* 2. FORCE the sidebar toggle button to stay visible and bright */
+    /* جعل زر فتح القائمة الجانبية بارزاً جداً باللون الأحمر عند إغلاقها */
     [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
+        background-color: #ff4b4b !important;
+        color: white !important;
+        border-radius: 5px !important;
         left: 10px !important;
         top: 10px !important;
-        background-color: #ff4b4b !important; /* Red color to be visible */
-        color: white !important;
-        border-radius: 8px !important;
-        padding: 5px !important;
-        z-index: 999999 !important;
-    }
-    
-    /* Ensuring the icon inside the button is white */
-    [data-testid="stSidebarCollapsedControl"] svg {
-        fill: white !important;
-        width: 30px !important;
-        height: 30px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -57,17 +46,17 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation (Search is now FIRST)
+# 2. القائمة الجانبية - صفحة البحث Woordzoeker هي الأولى الآن
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# Share Section
+# قسم المشاركة في القائمة الجانبية
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
 st.sidebar.code(link, language=None)
 
-# --- PAGES CONTENT ---
+# --- محتوى الصفحات ---
 
 if page == "Woordzoeker":
     if data is not None:
