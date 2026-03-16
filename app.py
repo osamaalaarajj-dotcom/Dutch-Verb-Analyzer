@@ -10,24 +10,30 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- HIDING INTERFACE ELEMENTS (GitHub, Deploy, Manage App) ---
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            .stAppDeployButton {display:none;}
-            #stDecoration {display:none;}
-            [data-testid="stStatusWidget"] {display:none;}
-            /* This part hides the 'Manage app' button */
-            button[title="Manage app"] {display: none;}
-            .manage-app-button {display: none !important;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# --- THE CLEAN INTERFACE PROTOCOL (Hiding Streamlit UI) ---
+# This CSS will target and remove the header, footer, and management buttons
+st.markdown("""
+    <style>
+    /* Hide the top header bar (Share, Star, GitHub, Deploy) */
+    header {visibility: hidden !important;}
+    
+    /* Hide the footer (Made with Streamlit) */
+    footer {visibility: hidden !important;}
+    
+    /* Hide the 'Manage app' button at the bottom right */
+    [data-testid="stStatusWidget"] {display: none !important;}
+    .stAppDeployButton {display: none !important;}
+    
+    /* Remove any extra padding at the top */
+    .block-container {
+        padding-top: 1rem !important;
+    }
 
-# Meta tags for link preview (Hidden from UI)
-st.markdown(f"""
+    /* Hide the 'Manage app' specifically for mobile/desktop */
+    iframe[title="manage-app"] {display: none !important;}
+    button[title="Manage app"] {display: none !important;}
+    </style>
+    
     <div style="display:none;">
         <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
         <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool.">
