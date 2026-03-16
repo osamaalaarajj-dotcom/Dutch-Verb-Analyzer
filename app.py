@@ -3,37 +3,22 @@ import pandas as pd
 import os
 import re
 
-# --- 1. SETTING UP PREVIEW CARD (THE MAGIC PART) ---
+# 1. Page Configuration
 st.set_page_config(
-    page_title="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj",
+    page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
-    layout="wide",
-    initial_sidebar_state="expanded",
-    # These Meta Tags define what appears when you share the link:
-    menu_items={
-        'Get Help': 'mailto:osamaalaarajj@gmail.com',
-        'About': "© 2026 Osama Abd Al-Nasser Al-Aaraj. All rights reserved."
-    }
+    layout="wide"
 )
 
-# Insert the special Meta Tags for Social Media Preview
-st.markdown("""
-    <head>
-        <meta property="og:type" content="website">
-        <meta property="og:url" content="https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/">
-        <meta property="og:title" content="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="og:description" content="An advanced tool to analyze, categorize, and master Dutch regular and irregular verbs. Developed for students.">
+# Fix: Use st.components to hide meta tags from the UI
+st.markdown(f"""
+    <div style="display:none;">
+        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
+        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool.">
+        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
         <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
-
-        <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/">
-        <meta property="twitter:title" content="🇳🇱 Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="twitter:description" content="Analyze and master Dutch verbs with this professional tool. Free for students.">
-        <meta property="twitter:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
-    </head>
+    </div>
 """, unsafe_allow_html=True)
-
-# ---------------------------------------------------------
 
 @st.cache_data
 def load_data():
@@ -50,9 +35,11 @@ def load_data():
 
 data = load_data()
 
+# 2. Sidebar Navigation
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
+# --- SECTIONS ---
 if page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
@@ -70,54 +57,39 @@ elif page == "Woordzoeker":
         if selected_word:
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
             is_irregular = result_row['original_index'] <= 206
-            
             color = "#ff4b4b" if is_irregular else "#28a745"
-            status = "Onregelmatig" if is_irregular else "Regelmatig"
-            st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2 style='color: {color};'>{'Onregelmatig' if is_irregular else 'Regelmatig'}: {selected_word}</h2>", unsafe_allow_html=True)
 
             c1, c2 = st.columns(2)
             with c1:
                 st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
                 st.info(f"**{cols[2]}**\n\n{result_row.iloc[2]}")
-            
             with c2:
                 st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
                 st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
 
-            if len(cols) > 5 and pd.notna(result_row.iloc[5]):
-                st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
-
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    text_area = st.text_area("Voer tekst in (tot 1500+ woorden):", height=300)
-    
+    text_area = st.text_area("Voer tekst in:", height=300)
     if st.button("Analyseer Tekst"):
         if text_area and data is not None:
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
-            
             irr_db = set(data[data['original_index'] <= 206].iloc[:, 0].str.lower())
             reg_db = set(data[data['original_index'] > 206].iloc[:, 0].str.lower())
-            
             f_irr = [w for w in words if w in irr_db]
             f_reg = [w for w in words if w in reg_db]
             f_oth = [w for w in words if w not in irr_db and w not in reg_db]
             
             col1, col2, col3 = st.columns(3)
-            with col1:
-                st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
-            with col2:
-                st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
-            with col3:
-                st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
+            with col1: st.error(f"🔴 Onregelmatig ({len(f_irr)})\n\n" + ", ".join(f_irr))
+            with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
+            with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
-    st.markdown("- **Licentie:** MIT\n- **Eigendom:** Intellectueel eigendom van de auteur.")
 
 elif page == "Contact":
     st.header("Contactinformatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
-    st.info("🔗 **LinkedIn:** [Voeg hier uw link toe]")
-    st.write("Locatie: Nederland")
