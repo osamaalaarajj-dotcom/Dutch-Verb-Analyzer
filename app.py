@@ -7,17 +7,24 @@ import re
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- كود تنظيف الواجهة (إخفاء أزرار البرمجة) ---
+# --- التعديل المطلوب: إخفاء أزرار البرمجة فقط والإبقاء على القائمة والإضاءة ---
 hide_style = """
     <style>
-    header {visibility: hidden !important;}
+    /* إخفاء زر Deploy وأيقونة GitHub فقط من الشريط العلوي */
+    .stAppDeployButton {display: none !important;}
+    header [data-testid="stHeader"] a {display: none !important;}
+    
+    /* إخفاء زر Manage app والـ footer في الأسفل */
     footer {visibility: hidden !important;}
     [data-testid="stStatusWidget"] {display: none !important;}
-    .stAppDeployButton {display: none !important;}
-    #MainMenu {visibility: hidden !important;}
+    
+    /* التأكد من أن الهيدر والقائمة (النقاط الثلاث) ظاهرة */
+    header {visibility: visible !important;}
+    #MainMenu {visibility: visible !important;}
     </style>
 """
 st.markdown(hide_style, unsafe_allow_html=True)
@@ -37,26 +44,20 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية
+# 2. القائمة الجانبية - (جعل Woordzoeker هي الأولى)
 st.sidebar.title("Navigatie")
-page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
+page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# --- قسم المشاركة في القائمة الجانبية (بدون أكواد معقدة) ---
+# --- قسم المشاركة ---
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
 st.sidebar.code(link, language=None)
-st.sidebar.info("Kopieer de link om te delen met studenten.")
 
 # --- محتوى الصفحات ---
-if page == "Over Ons":
-    st.header("Over Ons")
-    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
-    st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-elif page == "Woordzoeker":
+# صفحة البحث (البداية)
+if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
         st.title("Nederlandse Woordenschat")
@@ -94,6 +95,12 @@ elif page == "Tekst Analyse":
             with col1: st.error(f"🔴 Onregelmatig ({len(f_irr)})\n\n" + ", ".join(f_irr))
             with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
             with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
+
+elif page == "Over Ons":
+    st.header("Over Ons")
+    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.write("**Geomatics Engineer | Master in Project Management**")
+    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
