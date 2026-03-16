@@ -10,7 +10,23 @@ st.set_page_config(
     layout="wide"
 )
 
-# Fix: Use st.components to hide meta tags from the UI
+# --- HIDING INTERFACE ELEMENTS (GitHub, Deploy, Manage App) ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stAppDeployButton {display:none;}
+            #stDecoration {display:none;}
+            [data-testid="stStatusWidget"] {display:none;}
+            /* This part hides the 'Manage app' button */
+            button[title="Manage app"] {display: none;}
+            .manage-app-button {display: none !important;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
+# Meta tags for link preview (Hidden from UI)
 st.markdown(f"""
     <div style="display:none;">
         <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
