@@ -7,39 +7,30 @@ import re
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- THE CLEAN INTERFACE PROTOCOL (Hiding Streamlit UI) ---
-# This CSS will target and remove the header, footer, and management buttons
+# --- THE CLEAN INTERFACE PROTOCOL (Targeted Hiding) ---
 st.markdown("""
     <style>
-    /* Hide the top header bar (Share, Star, GitHub, Deploy) */
-    header {visibility: hidden !important;}
-    
-    /* Hide the footer (Made with Streamlit) */
-    footer {visibility: hidden !important;}
-    
-    /* Hide the 'Manage app' button at the bottom right */
-    [data-testid="stStatusWidget"] {display: none !important;}
+    /* 1. Hide only the developer-specific buttons in the header */
+    /* This targets the GitHub icon and the Deploy button specifically */
     .stAppDeployButton {display: none !important;}
+    header [data-testid="stHeader"] a[href*="github.com"] {display: none !important;}
     
-    /* Remove any extra padding at the top */
+    /* 2. Hide the 'Manage app' button and footer at the bottom */
+    footer {visibility: hidden !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    
+    /* 3. Ensure the Menu button (three dots) and Sidebar button stay visible */
+    header {visibility: visible !important;}
+    
+    /* Adjust padding for a clean look */
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 2rem !important;
     }
-
-    /* Hide the 'Manage app' specifically for mobile/desktop */
-    iframe[title="manage-app"] {display: none !important;}
-    button[title="Manage app"] {display: none !important;}
     </style>
-    
-    <div style="display:none;">
-        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
-        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool.">
-        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
-    </div>
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -57,19 +48,14 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation
+# 2. Sidebar Navigation (Woordzoeker is now the FIRST option)
 st.sidebar.title("Navigatie")
-page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
+page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
 # --- SECTIONS ---
-if page == "Over Ons":
-    st.header("Over Ons")
-    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
-    st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-elif page == "Woordzoeker":
+# Default Start Page
+if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
         st.title("Nederlandse Woordenschat")
@@ -107,6 +93,13 @@ elif page == "Tekst Analyse":
             with col1: st.error(f"🔴 Onregelmatig ({len(f_irr)})\n\n" + ", ".join(f_irr))
             with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
             with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
+
+elif page == "Over Ons":
+    st.header("Over Ons")
+    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.write("**Geomatics Engineer | Master in Project Management**")
+    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
+    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
