@@ -14,13 +14,13 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# Hide GitHub, Manage App, Deploy and footer
+# Hide GitHub, Manage App, Deploy and Footer
 # ---------------------------------------------------
 hide_streamlit_style = """
 <style>
 
-/* Hide GitHub button */
-header [href*="github"]{
+/* Hide GitHub icon in header */
+header a[href*="github.com"]{
     display:none !important;
 }
 
@@ -29,14 +29,19 @@ header [href*="github"]{
     display:none !important;
 }
 
-/* Hide Manage App button */
+/* Hide Manage App (status widget in Streamlit Cloud) */
 [data-testid="stStatusWidget"]{
     display:none !important;
 }
 
-/* Hide footer */
+/* Hide Streamlit footer */
 footer{
-    visibility:hidden;
+    visibility:hidden !important;
+}
+
+/* Keep menu and tools visible */
+#MainMenu{
+    visibility:visible !important;
 }
 
 </style>
@@ -86,8 +91,8 @@ page = st.sidebar.radio(
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 
-website_link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-st.sidebar.code(website_link)
+link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
+st.sidebar.code(link)
 
 # ---------------------------------------------------
 # Word search page
@@ -96,14 +101,13 @@ if page == "Woordzoeker":
 
     if data is not None:
 
-        columns = data.columns
-
+        cols = data.columns
         st.title("Nederlandse Woordenschat")
 
         word_list = data.iloc[:, 0].astype(str).tolist()
 
         selected_word = st.selectbox(
-            f"Zoek {columns[0]}:",
+            f"Zoek {cols[0]}:",
             options=[""] + word_list
         )
 
@@ -112,25 +116,24 @@ if page == "Woordzoeker":
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
 
             is_irregular = result_row["original_index"] <= 206
-
             color = "#ff4b4b" if is_irregular else "#28a745"
 
-            verb_type = "Onregelmatig" if is_irregular else "Regelmatig"
-
             st.markdown(
-                f"<h2 style='color:{color};'>{verb_type}: {selected_word}</h2>",
+                f"<h2 style='color:{color};'>"
+                f"{'Onregelmatig' if is_irregular else 'Regelmatig'}: {selected_word}"
+                f"</h2>",
                 unsafe_allow_html=True
             )
 
-            col1, col2 = st.columns(2)
+            c1, c2 = st.columns(2)
 
-            with col1:
-                st.info(f"**{columns[1]}**\n\n{result_row.iloc[1]}")
-                st.info(f"**{columns[2]}**\n\n{result_row.iloc[2]}")
+            with c1:
+                st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
+                st.info(f"**{cols[2]}**\n\n{result_row.iloc[2]}")
 
-            with col2:
-                st.success(f"**{columns[3]}**\n\n{result_row.iloc[3]}")
-                st.success(f"**{columns[4]}**\n\n{result_row.iloc[4]}")
+            with c2:
+                st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
+                st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
 
 # ---------------------------------------------------
 # Text analysis page
@@ -139,57 +142,52 @@ elif page == "Tekst Analyse":
 
     st.header("Tekst Analyse")
 
-    text_input = st.text_area(
+    text_area = st.text_area(
         "Plak je tekst hier:",
         height=300
     )
 
     if st.button("Analyseer"):
 
-        if text_input and data is not None:
+        if text_area and data is not None:
 
-            clean_text = re.sub(r"[^\w\s]", " ", text_input)
-
+            clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
 
-            irregular_database = set(
+            irr_db = set(
                 data[data["original_index"] <= 206]
                 .iloc[:, 0]
                 .str.lower()
             )
 
-            regular_database = set(
+            reg_db = set(
                 data[data["original_index"] > 206]
                 .iloc[:, 0]
                 .str.lower()
             )
 
-            found_irregular = [w for w in words if w in irregular_database]
-            found_regular = [w for w in words if w in regular_database]
-
-            found_other = [
-                w for w in words
-                if w not in irregular_database and w not in regular_database
-            ]
+            f_irr = [w for w in words if w in irr_db]
+            f_reg = [w for w in words if w in reg_db]
+            f_oth = [w for w in words if w not in irr_db and w not in reg_db]
 
             col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.error(
-                    f"🔴 Onregelmatig ({len(found_irregular)})\n\n"
-                    + ", ".join(found_irregular)
+                    f"🔴 Onregelmatig ({len(f_irr)})\n\n"
+                    + ", ".join(f_irr)
                 )
 
             with col2:
                 st.success(
-                    f"🟢 Regelmatig ({len(found_regular)})\n\n"
-                    + ", ".join(found_regular)
+                    f"🟢 Regelmatig ({len(f_reg)})\n\n"
+                    + ", ".join(f_reg)
                 )
 
             with col3:
                 st.info(
-                    f"🔵 Overige ({len(found_other)})\n\n"
-                    + ", ".join(found_other)
+                    f"🔵 Overige ({len(f_oth)})\n\n"
+                    + ", ".join(f_oth)
                 )
 
 # ---------------------------------------------------
@@ -225,6 +223,4 @@ elif page == "Contact":
 
     st.header("Contactinformatie")
 
-    st.success(
-        "📧 Email: osamaalaarajj@gmail.com"
-    )
+    st.success("📧 Email: osamaalaarajj@gmail.com")
