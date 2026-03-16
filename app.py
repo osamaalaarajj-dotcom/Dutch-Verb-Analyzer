@@ -3,27 +3,26 @@ import pandas as pd
 import os
 import re
 
-# 1. إعدادات الصفحة - جعل البحث يفتح تلقائياً
+# 1. إعدادات الصفحة وجعل البحث هو البداية
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool",
-    page_icon="🇳🇱",
+    page_title="Nederlandse Werkwoorden Tool", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- كود CSS لإخفاء أزرار البرمجة فقط ---
+# --- كود CSS الاحترافي لإخفاء أزرار التطوير فقط مع بقاء الأزرار الأساسية ---
 st.markdown("""
     <style>
-    /* 1. إخفاء زر Deploy وشعار GitHub في الأعلى */
+    /* 1. إخفاء أزرار GitHub و Deploy و Share في الشريط العلوي */
     .stAppDeployButton {display: none !important;}
-    header [data-testid="stHeader"] {background-color: transparent !important;}
-    header a {display: none !important;}
+    header [data-testid="stHeader"] div:has(a) {display: none !important;}
+    header [data-testid="stHeader"] a {display: none !important;}
     
     /* 2. إخفاء زر Manage app في الأسفل تماماً */
     [data-testid="stStatusWidget"] {display: none !important;}
     footer {display: none !important;}
-    
-    /* ملاحظة: لم نضف أي كود لإخفاء زر القائمة أو الإضاءة لضمان بقائهما */
+
+    /* ملاحظة: زر القائمة (Sidebar Toggle) وزر الإضاءة (Theme) سيبقيان كما هما */
     </style>
 """, unsafe_allow_html=True)
 
@@ -42,11 +41,11 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية - صفحة البحث هي الخيار الأول
+# 2. القائمة الجانبية - تم تقديم صفحة البحث لتكون هي البداية
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# إضافة رابط المشاركة في القائمة الجانبية
+# رابط المشاركة في القائمة الجانبية
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
@@ -54,6 +53,7 @@ st.sidebar.code(app_url, language=None)
 
 # --- محتوى الصفحات ---
 
+# الصفحة الافتراضية (البحث)
 if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
