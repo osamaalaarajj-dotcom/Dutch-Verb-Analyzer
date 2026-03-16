@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration (Full Layout)
+# 1. Page Configuration (Fixed Layout)
 st.set_page_config(page_title="Nederlandse Werkwoorden Tool", layout="wide")
 
 @st.cache_data
@@ -11,7 +11,6 @@ def load_data():
     file = "0-KNM-A2_Tool4.xlsx"
     if os.path.exists(file):
         try:
-            # Loading full dataset
             df = pd.read_excel(file, sheet_name="Blad2")
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
             df['original_index'] = range(len(df))
@@ -22,11 +21,11 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation
+# 2. Sidebar Navigation (Fixed Structure)
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
-# --- SECTION 1: ABOUT (Full Description) ---
+# --- SECTION 1: OVER ONS ---
 if page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
@@ -34,7 +33,7 @@ if page == "Over Ons":
     st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
     st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-# --- SECTION 2: WORD SEARCH (All Columns Restored) ---
+# --- SECTION 2: WOORDZOEKER (4 Boxes Fixed) ---
 elif page == "Woordzoeker":
     if data is not None:
         cols = data.columns
@@ -50,7 +49,7 @@ elif page == "Woordzoeker":
             status = "Onregelmatig" if is_irregular else "Regelmatig"
             st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
 
-            # Restoring all data boxes
+            # Displaying the 4 core columns (Imperfectum & Voltooid)
             c1, c2 = st.columns(2)
             with c1:
                 st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
@@ -63,15 +62,13 @@ elif page == "Woordzoeker":
             if len(cols) > 5 and pd.notna(result_row.iloc[5]):
                 st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
 
-# --- SECTION 3: TEXT ANALYSIS (Full Feature) ---
+# --- SECTION 3: TEKST ANALYSE (Comprehensive Analysis) ---
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    st.write("Plak uw tekst hieronder (tot 1500+ woorden) voor een gedetailleerde analyse.")
-    text_area = st.text_area("Voer tekst in:", height=300)
+    text_area = st.text_area("Voer tekst in (tot 1500+ woorden):", height=300)
     
     if st.button("Analyseer Tekst"):
         if text_area and data is not None:
-            # Clean and split text
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
             
@@ -96,9 +93,9 @@ elif page == "Juridische Informatie":
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
     st.markdown("- **Licentie:** MIT\n- **Eigendom:** Intellectueel eigendom van de auteur.")
 
-# --- SECTION 5: CONTACT (Restored) ---
+# --- SECTION 5: CONTACT ---
 elif page == "Contact":
     st.header("Contactinformatie")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
-    st.info("🔗 **LinkedIn:** [Uw profiel link]")
+    st.info("🔗 **LinkedIn:** [Voeg hier uw link toe]")
     st.write("Locatie: Nederland")
