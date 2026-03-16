@@ -3,28 +3,29 @@ import pandas as pd
 import os
 import re
 
-# 1. إعدادات الصفحة وجعل القائمة مفتوحة تلقائياً
+# 1. إعدادات الصفحة - جعل البحث يفتح تلقائياً
 st.set_page_config(
-    page_title="Nederlandse Werkwoorden Tool", 
+    page_title="Nederlandse Werkwoorden Tool",
+    page_icon="🇳🇱",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- كود CSS لإخفاء أزرار البرمجة وتنظيف الواجهة ---
-hide_st_style = """
-            <style>
-            /* إخفاء شريط الأدوات العلوي بالكامل */
-            header {visibility: hidden !important;}
-            /* إخفاء زر Manage app في الأسفل */
-            footer {visibility: hidden !important;}
-            [data-testid="stStatusWidget"] {display: none !important;}
-            .stAppDeployButton {display: none !important;}
-            #MainMenu {visibility: hidden !important;}
-            /* إخفاء أي أزرار إضافية تظهر للمطور */
-            footer {display: none !important;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+# --- كود CSS لإخفاء أزرار البرمجة فقط ---
+st.markdown("""
+    <style>
+    /* 1. إخفاء زر Deploy وشعار GitHub في الأعلى */
+    .stAppDeployButton {display: none !important;}
+    header [data-testid="stHeader"] {background-color: transparent !important;}
+    header a {display: none !important;}
+    
+    /* 2. إخفاء زر Manage app في الأسفل تماماً */
+    [data-testid="stStatusWidget"] {display: none !important;}
+    footer {display: none !important;}
+    
+    /* ملاحظة: لم نضف أي كود لإخفاء زر القائمة أو الإضاءة لضمان بقائهما */
+    </style>
+""", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -41,19 +42,18 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية - تم جعل البحث هو الخيار الأول
+# 2. القائمة الجانبية - صفحة البحث هي الخيار الأول
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# إضافة رابط المشاركة بشكل بسيط وأنيق
+# إضافة رابط المشاركة في القائمة الجانبية
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
 st.sidebar.code(app_url, language=None)
 
-# --- منطق الصفحات ---
+# --- محتوى الصفحات ---
 
-# صفحة البحث عن الكلمات (تظهر أولاً الآن)
 if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
@@ -82,35 +82,27 @@ if page == "Woordzoeker":
 
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    st.write("Plak uw tekst hieronder voor een gedetailleerde analyse.")
     text_area = st.text_area("Voer tekst in:", height=300)
-    
-    if st.button("Analyseer Tekست"):
+    if st.button("Analyseer Tekst"):
         if text_area and data is not None:
             clean_text = re.sub(r'[^\w\s]', ' ', text_area)
             words = sorted(set([w.lower() for w in clean_text.split()]))
-            
             irr_db = set(data[data['original_index'] <= 206].iloc[:, 0].str.lower())
             reg_db = set(data[data['original_index'] > 206].iloc[:, 0].str.lower())
-            
             f_irr = [w for w in words if w in irr_db]
             f_reg = [w for w in words if w in reg_db]
             f_oth = [w for w in words if w not in irr_db and w not in reg_db]
             
             col1, col2, col3 = st.columns(3)
-            with col1:
-                st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
-            with col2:
-                st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
-            with col3:
-                st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
+            with col1: st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
+            with col2: st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
+            with col3: st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
 elif page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
     st.write("**Geomatics Engineer | Master in Project Management**")
     st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
