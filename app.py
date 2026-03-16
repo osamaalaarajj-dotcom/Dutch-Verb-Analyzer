@@ -3,24 +3,34 @@ import pandas as pd
 import os
 import re
 
-# 1. إعدادات الصفحة الأساسية
+# 1. إعدادات الصفحة وجعلها تفتح مباشرة على البحث
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded" # تجعل القائمة مفتوحة تلقائياً عند الدخول
 )
 
-# --- كود تنظيف الواجهة (إخفاء أزرار البرمجة) ---
-hide_style = """
+# --- كود CSS لتثبيت القائمة ومنع اختفائها تماماً وتنظيف الواجهة ---
+st.markdown("""
     <style>
+    /* إخفاء أدوات المطور */
     header {visibility: hidden !important;}
     footer {visibility: hidden !important;}
     [data-testid="stStatusWidget"] {display: none !important;}
     .stAppDeployButton {display: none !important;}
-    #MainMenu {visibility: hidden !important;}
+    
+    /* منع اختفاء القائمة الجانبية كلياً وجعل زر الفتح بارزاً */
+    [data-testid="sidebar-collapsed-control"] {
+        left: 0;
+        background-color: #ff4b4b !important;
+        color: white !important;
+        border-radius: 0 5px 5px 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+    }
     </style>
-"""
-st.markdown(hide_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -37,26 +47,20 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية
+# 2. القائمة الجانبية - تم تغيير الترتيب لتكون صفحة البحث هي الأولى
 st.sidebar.title("Navigatie")
-page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
+page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# --- قسم المشاركة في القائمة الجانبية (بدون أكواد معقدة) ---
+# --- قسم المشاركة ---
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
 st.sidebar.code(link, language=None)
-st.sidebar.info("Kopieer de link om te delen met studenten.")
 
 # --- محتوى الصفحات ---
-if page == "Over Ons":
-    st.header("Over Ons")
-    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
-    st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-elif page == "Woordzoeker":
+# الصفحة الأولى الآن هي البحث عن الكلمات
+if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
         st.title("Nederlandse Woordenschat")
@@ -95,8 +99,15 @@ elif page == "Tekst Analyse":
             with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
             with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
+elif page == "Over Ons":
+    st.header("Over Ons")
+    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.write("**Geomatics Engineer | Master in Project Management**")
+    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
+    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
+
 elif page == "Juridische Informatie":
-    st.header("Juridische Informatie")
+    st.header("Juridische Informatية")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
 
 elif page == "Contact":
