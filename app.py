@@ -3,76 +3,53 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration (Keep existing layout)
+# 1. Page Configuration
 st.set_page_config(
     page_title="Nederlandse Werkwoorden Tool",
     page_icon="🇳🇱",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# --- THE CLEAN INTERFACE PROTOCOL (Targeted Hiding) ---
-# This CSS will target ONLY the GitHub icon in the main header
+# --- THE ABSOLUTE HIDE PROTOCOL ---
 st.markdown("""
     <style>
-    /* 1. Target the GitHub link specifically and hide it */
-    header a[href*="github.com"] {
+    /* 1. Target the GitHub icon/link specifically using multiple selectors */
+    header a[href*="github.com"], 
+    header a[title*="GitHub"],
+    header svg[class*="github"] {
         display: none !important;
         visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     
-    /* 2. Target any developer-specific deploy/fork buttons in the main header */
-    .stAppDeployButton {
+    /* 2. Hide the Deploy/Fork button (The 'Deploy' text button) */
+    .stAppDeployButton, 
+    header button:has(div:contains("Deploy")),
+    header button:has(div:contains("Fork")) {
         display: none !important;
-        visibility: hidden !important;
-    }
-    
-    /* Ensure other native top right buttons like full screen, menu, and light switch are NOT hidden */
-    header [data-testid="stHeader"] .stException {
-        display: none !important;
-    }
-    
-    /* Target the Deploy button's parent container just in case, but keep the core menu dot */
-    header button[kind="secondary"] {
-        display: none !important;
-    }
-    
-    /* Explicitly keep the native sidebar toggle */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
     }
 
-    /* Keep the original main menu (three dots) so options like print/theme settings remain */
+    /* 3. Target any secondary buttons in the header that are NOT the menu */
+    header [data-testid="stHeader"] div:nth-child(2) > div:not(:last-child) {
+        display: none !important;
+    }
+
+    /* 4. Hide 'Manage app' and Footer strictly */
+    footer {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    button[title="Manage app"], iframe[title="manage-app"] {
+        display: none !important;
+    }
+
+    /* Keep Sidebar toggle and Main Menu dots visible */
+    [data-testid="stSidebarCollapsedControl"], 
     #MainMenu {
         display: block !important;
         visibility: visible !important;
     }
-    
-    /* Remove 'Made with Streamlit' and 'Manage app' for a clean public look */
-    footer {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    [data-testid="stStatusWidget"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    iframe[title="manage-app"] {
-        display: none !important;
-    }
-    button[title="Manage app"] {
-        display: none !important;
-    }
     </style>
-    
-    <div style="display:none;">
-        <title>Nederlandse Werkwoorden Tool - Osama Al-Aaraj</title>
-        <meta name="description" content="Master Dutch verbs with Osama Al-Aaraj's professional tool. Built for students.">
-        <meta property="og:title" content="Nederlandse Werkwoorden Tool - Osama Al-Aaraj">
-        <meta property="og:image" content="https://raw.githubusercontent.com/osamaalaarajj-dotcom/Dutch-Verb-Analyzer/main/preview_image.jpg">
-        <meta property="og:url" content="https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/">
-        <meta property="og:type" content="website">
-    </div>
 """, unsafe_allow_html=True)
 
 @st.cache_data
@@ -90,19 +67,11 @@ def load_data():
 
 data = load_data()
 
-# 2. Sidebar Navigation (Words Search first)
+# 2. Sidebar - Word Search First
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# Sharing Section in Sidebar (Native Share button remains active, this is extra)
-st.sidebar.write("---")
-st.sidebar.write("🔗 **Deel de website:**")
-app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
-st.sidebar.code(app_url, language=None)
-
 # --- SECTIONS ---
-
-# Search section (FIRST)
 if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
@@ -114,9 +83,8 @@ if page == "Woordzoeker":
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
             is_irregular = result_row['original_index'] <= 206
             color = "#ff4b4b" if is_irregular else "#28a745"
-            status = "Onregelmatig" if is_irregular else "Regelmatig"
-            st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
-
+            st.markdown(f"<h2 style='color: {color};'>{'Onregelmatig' if is_irregular else 'Regelmatig'}: {selected_word}</h2>", unsafe_allow_html=True)
+            
             c1, c2 = st.columns(2)
             with c1:
                 st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
@@ -124,9 +92,6 @@ if page == "Woordzoeker":
             with c2:
                 st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
                 st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
-
-            if len(cols) > 5 and pd.notna(result_row.iloc[5]):
-                st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
 
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
@@ -142,20 +107,19 @@ elif page == "Tekst Analyse":
             f_oth = [w for w in words if w not in irr_db and w not in reg_db]
             
             col1, col2, col3 = st.columns(3)
-            with col1: st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
-            with col2: st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
-            with col3: st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
+            with col1: st.error(f"🔴 Onregelmatig ({len(f_irr)})\n\n" + ", ".join(f_irr))
+            with col2: st.success(f"🟢 Regelmatig ({len(f_reg)})\n\n" + ", ".join(f_reg))
+            with col3: st.info(f"🔵 Overige ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
 elif page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
     st.write("**Geomatics Engineer | Master in Project Management**")
-    st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
 
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
 
 elif page == "Contact":
-    st.header("Contact informatie")
+    st.header("Contact")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
