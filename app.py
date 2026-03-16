@@ -10,19 +10,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- كود CSS الاحترافي لإخفاء أزرار التطوير فقط مع بقاء الأزرار الأساسية ---
+# --- كود CSS القوي لإخفاء الأزرار الثلاثة المحددة فقط ---
 st.markdown("""
     <style>
-    /* 1. إخفاء أزرار GitHub و Deploy و Share في الشريط العلوي */
-    .stAppDeployButton {display: none !important;}
-    header [data-testid="stHeader"] div:has(a) {display: none !important;}
-    header [data-testid="stHeader"] a {display: none !important;}
+    /* 1. إخفاء زر Fork و GitHub و Deploy وكل الروابط في الهيدر العلوي */
+    header [data-testid="stHeader"] a {
+        display: none !important;
+    }
+    header [data-testid="stHeader"] svg {
+        display: none !important;
+    }
     
-    /* 2. إخفاء زر Manage app في الأسفل تماماً */
-    [data-testid="stStatusWidget"] {display: none !important;}
-    footer {display: none !important;}
-
-    /* ملاحظة: زر القائمة (Sidebar Toggle) وزر الإضاءة (Theme) سيبقيان كما هما */
+    /* 2. إخفاء زر Manage app وكل ما يتعلق بشريط الحالة السفلي */
+    [data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    footer {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* إخفاء القائمة الإضافية التي قد تحتوي على رابط GitHub */
+    #MainMenu {visibility: hidden !important;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -41,11 +51,11 @@ def load_data():
 
 data = load_data()
 
-# 2. القائمة الجانبية - تم تقديم صفحة البحث لتكون هي البداية
+# 2. القائمة الجانبية - صفحة البحث أولاً
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Woordzoeker", "Tekst Analyse", "Over Ons", "Juridische Informatie", "Contact"])
 
-# رابط المشاركة في القائمة الجانبية
+# رابط المشاركة
 st.sidebar.write("---")
 st.sidebar.write("🔗 **Deel de website:**")
 app_url = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app/"
@@ -53,7 +63,6 @@ st.sidebar.code(app_url, language=None)
 
 # --- محتوى الصفحات ---
 
-# الصفحة الافتراضية (البحث)
 if page == "Woordzoeker":
     if data is not None:
         cols = data.columns
@@ -64,7 +73,6 @@ if page == "Woordzoeker":
         if selected_word:
             result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
             is_irregular = result_row['original_index'] <= 206
-            
             color = "#ff4b4b" if is_irregular else "#28a745"
             status = "Onregelmatig" if is_irregular else "Regelmatig"
             st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
@@ -76,9 +84,6 @@ if page == "Woordzoeker":
             with c2:
                 st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
                 st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
-
-            if len(cols) > 5 and pd.notna(result_row.iloc[5]):
-                st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
 
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
@@ -100,7 +105,7 @@ elif page == "Tekst Analyse":
 
 elif page == "Over Ons":
     st.header("Over Ons")
-    st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
+    st.markdown(f"### Osama Abd Al-Nasser Al-Aaraj")
     st.write("**Geomatics Engineer | Master in Project Management**")
     st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
 
