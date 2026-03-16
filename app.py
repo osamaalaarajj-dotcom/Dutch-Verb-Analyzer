@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import re
 
-# 1. Page Configuration
+# 1. Page Configuration (Full Layout)
 st.set_page_config(page_title="Nederlandse Werkwoorden Tool", layout="wide")
 
 @st.cache_data
@@ -11,7 +11,9 @@ def load_data():
     file = "0-KNM-A2_Tool4.xlsx"
     if os.path.exists(file):
         try:
+            # Loading full dataset
             df = pd.read_excel(file, sheet_name="Blad2")
+            df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
             df['original_index'] = range(len(df))
             return df
         except:
@@ -24,78 +26,79 @@ data = load_data()
 st.sidebar.title("Navigatie")
 page = st.sidebar.radio("Ga naar:", ["Over Ons", "Woordzoeker", "Tekst Analyse", "Juridische Informatie", "Contact"])
 
-# --- SECTION 1: ABOUT THE DEVELOPER ---
+# --- SECTION 1: ABOUT (Full Description) ---
 if page == "Over Ons":
     st.header("Over Ons")
     st.markdown("### Osama Abd Al-Nasser Al-Aaraj")
     st.write("**Geomatics Engineer | Master in Project Management**")
     st.info("'Mijn liefde voor het leren van alles zorgt ervoor dat ik niets afmaak.'")
-    st.write("Deze tool is ontwikkeld om de Nederlandse taalreis te vergemakkelijken.")
+    st.write("Ik presenteer u deze tool om u te helpen bij uw taalreis.")
 
-# --- SECTION 2: WORD SEARCH ---
+# --- SECTION 2: WORD SEARCH (All Columns Restored) ---
 elif page == "Woordzoeker":
     if data is not None:
-        st.title("Woordzoeker")
+        cols = data.columns
+        st.title("Nederlandse Woordenschat")
         word_list = data.iloc[:, 0].astype(str).tolist()
-        word = st.selectbox("Zoek Infinitive:", [""] + word_list)
-        if word:
-            row = data[data.iloc[:, 0] == word].iloc[0]
-            is_irr = row['original_index'] <= 206
-            color = "#ff4b4b" if is_irr else "#28a745"
-            status = "Onregelmatig" if is_irr else "Regelmatig"
+        selected_word = st.selectbox(f"Zoek {cols[0]}:", options=[""] + word_list)
+
+        if selected_word:
+            result_row = data[data.iloc[:, 0] == selected_word].iloc[0]
+            is_irregular = result_row['original_index'] <= 206
             
-            st.markdown(f"<h2 style='color: {color};'>{status}: {word}</h2>", unsafe_allow_html=True)
-            
+            color = "#ff4b4b" if is_irregular else "#28a745"
+            status = "Onregelmatig" if is_irregular else "Regelmatig"
+            st.markdown(f"<h2 style='color: {color};'>{status}: {selected_word}</h2>", unsafe_allow_html=True)
+
+            # Restoring all data boxes
             c1, c2 = st.columns(2)
             with c1:
-                st.info(f"**Imperfectum:** {row.iloc[1]} / {row.iloc[2]}")
-            with c2:
-                st.success(f"**Voltooid Deelwoord:** {row.iloc[3]}")
+                st.info(f"**{cols[1]}**\n\n{result_row.iloc[1]}")
+                st.info(f"**{cols[2]}**\n\n{result_row.iloc[2]}")
             
-            if len(data.columns) > 5 and pd.notna(row.iloc[5]):
-                st.warning(f"**Extra Info:** {row.iloc[5]}")
+            with c2:
+                st.success(f"**{cols[3]}**\n\n{result_row.iloc[3]}")
+                st.success(f"**{cols[4]}**\n\n{result_row.iloc[4]}")
 
-# --- SECTION 3: TEXT ANALYSIS ---
+            if len(cols) > 5 and pd.notna(result_row.iloc[5]):
+                st.warning(f"**{cols[5]}**\n\n{result_row.iloc[5]}")
+
+# --- SECTION 3: TEXT ANALYSIS (Full Feature) ---
 elif page == "Tekst Analyse":
     st.header("Tekst Analyse")
-    st.write("Plak uw tekst hieronder voor een volledige analyse.")
-    text = st.text_area("Tekst invoeren:", height=300, key="main_text_area")
+    st.write("Plak uw tekst hieronder (tot 1500+ woorden) voor een gedetailleerde analyse.")
+    text_area = st.text_area("Voer tekst in:", height=300)
     
-    if st.button("Analyseer Nu"):
-        if text and data is not None:
-            words = set(re.sub(r'[^\w\s]', ' ', text).lower().split())
+    if st.button("Analyseer Tekst"):
+        if text_area and data is not None:
+            # Clean and split text
+            clean_text = re.sub(r'[^\w\s]', ' ', text_area)
+            words = sorted(set([w.lower() for w in clean_text.split()]))
+            
             irr_db = set(data[data['original_index'] <= 206].iloc[:, 0].str.lower())
             reg_db = set(data[data['original_index'] > 206].iloc[:, 0].str.lower())
             
-            f_irr = sorted([w for w in words if w in irr_db])
-            f_reg = sorted([w for w in words if w in reg_db])
-            f_oth = sorted([w for w in words if w not in irr_db and w not in reg_db])
+            f_irr = [w for w in words if w in irr_db]
+            f_reg = [w for w in words if w in reg_db]
+            f_oth = [w for w in words if w not in irr_db and w not in reg_db]
             
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                st.markdown("<h3 style='color: #ff4b4b;'>Onregelmatig</h3>", unsafe_allow_html=True)
-                st.error(", ".join(f_irr) if f_irr else "Geen gevonden")
-            with c2:
-                st.markdown("<h3 style='color: #28a745;'>Regelmatig</h3>", unsafe_allow_html=True)
-                st.success(", ".join(f_reg) if f_reg else "Geen gevonden")
-            with c3:
-                st.markdown("<h3 style='color: #555555;'>Overige Woorden</h3>", unsafe_allow_html=True)
-                st.info(", ".join(f_oth) if f_oth else "Geen")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.error(f"🔴 **Onregelmatig** ({len(f_irr)})\n\n" + ", ".join(f_irr))
+            with col2:
+                st.success(f"🟢 **Regelmatig** ({len(f_reg)})\n\n" + ", ".join(f_reg))
+            with col3:
+                st.info(f"🔵 **Overige** ({len(f_oth)})\n\n" + ", ".join(f_oth))
 
-# --- SECTION 4: LEGAL INFO ---
+# --- SECTION 4: LEGAL ---
 elif page == "Juridische Informatie":
     st.header("Juridische Informatie")
     st.write("© 2026 Osama Abd Al-Nasser Al-Aaraj. Alle rechten voorbehouden.")
-    st.markdown("""
-    - **Auteursrecht:** De database en code zijn intellectueel eigendom van de auteur.
-    - **Licentie:** MIT License.
-    """)
+    st.markdown("- **Licentie:** MIT\n- **Eigendom:** Intellectueel eigendom van de auteur.")
 
-# --- SECTION 5: CONTACT ---
+# --- SECTION 5: CONTACT (Restored) ---
 elif page == "Contact":
     st.header("Contactinformatie")
-    st.write("Heeft u vragen of wilt u samenwerken? Neem contact op:")
     st.success("📧 **Email:** osamaalaarajj@gmail.com")
-    st.info("🔗 **LinkedIn:** [Uw LinkedIn Profiel]")
-    st.write("---")
-    st.caption("Locatie: Nederland | Ontwikkeld in 2026")
+    st.info("🔗 **LinkedIn:** [Uw profiel link]")
+    st.write("Locatie: Nederland")
