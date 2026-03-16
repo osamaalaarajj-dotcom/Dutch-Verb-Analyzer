@@ -14,29 +14,29 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# Hide GitHub, Manage App and Deploy only
+# Hide GitHub, Manage App, Deploy and footer
 # ---------------------------------------------------
 hide_streamlit_style = """
 <style>
 
-/* Hide GitHub icon */
-header a[href*="github"] {
-    display: none !important;
-}
-
-/* Hide Manage App */
-a[href*="share.streamlit.io"] {
-    display: none !important;
+/* Hide GitHub button */
+header [href*="github"]{
+    display:none !important;
 }
 
 /* Hide Deploy button */
-.stAppDeployButton {
-    display: none !important;
+.stAppDeployButton{
+    display:none !important;
+}
+
+/* Hide Manage App button */
+[data-testid="stStatusWidget"]{
+    display:none !important;
 }
 
 /* Hide footer */
-footer {
-    visibility: hidden;
+footer{
+    visibility:hidden;
 }
 
 </style>
@@ -53,16 +53,11 @@ def load_data():
     file_path = "0-KNM-A2_Tool4.xlsx"
 
     if os.path.exists(file_path):
-
         try:
             df = pd.read_excel(file_path, sheet_name="Blad2")
-
             df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
-
             df["original_index"] = range(len(df))
-
             return df
-
         except:
             return None
 
@@ -95,7 +90,7 @@ website_link = "https://dutch-verb-analyzer-uqtt8megnkusmtu5mwba6g.streamlit.app
 st.sidebar.code(website_link)
 
 # ---------------------------------------------------
-# Word Finder page
+# Word search page
 # ---------------------------------------------------
 if page == "Woordzoeker":
 
@@ -138,7 +133,7 @@ if page == "Woordzoeker":
                 st.success(f"**{columns[4]}**\n\n{result_row.iloc[4]}")
 
 # ---------------------------------------------------
-# Text Analysis page
+# Text analysis page
 # ---------------------------------------------------
 elif page == "Tekst Analyse":
 
